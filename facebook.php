@@ -13,11 +13,15 @@ class facebook extends \yii\base\Widget
     public $language;
     public $country;
 
-    function __construct($facebookAppID,$facebookAppVersion,$language,$country){
+    public $auth_url;
+
+    function __construct($facebookAppID,$facebookAppVersion,$language,$country,$auth_url){
         $this->facebookAppID = $facebookAppID;
         $this->facebookAppVersion = $facebookAppVersion;
         $this->language = $language;
         $this->country = $country;
+
+        $this->auth_url = $auth_url;
     }
 
     public function loginButton(){
@@ -61,6 +65,42 @@ class facebook extends \yii\base\Widget
 
            });
          }
+
+         // Fetch the user profile data from facebook
+       	function getFbUserData(){
+       	    FB.api('/me', {locale: 'en_US', fields: 'id,first_name,last_name,email,link,gender,locale,picture'},
+       	    function (user) {
+       			console.log('[FB userData]', user);
+
+           			$.ajax({
+                  url: '".$this->auth_url."',
+           				type: 'POST',
+           				data:{
+           					'email'		: user.email,
+           					'first_name': user.first_name,
+           					'last_name'	: user.last_name,
+           					'id'		: user.id,
+           					'username'	: user.first_name+'.'+user.last_name,
+           					'picture'	: user.picture.data.url,
+           				},
+           				dataType: 'json',
+           				success:function(data){
+           					console.log('FB userdata',data);
+                  },
+           				error: function(j){
+           					console.log(j);
+           				}
+           			});
+       	    });
+       	}
+
+
+
+
+
+
+
+
         </script>";
     }
 
